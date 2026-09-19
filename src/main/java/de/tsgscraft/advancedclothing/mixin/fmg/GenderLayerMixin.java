@@ -129,7 +129,7 @@ public class GenderLayerMixin<ENTITY extends LivingEntity, MODEL extends Humanoi
                     PlayerRenderer renderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(entity);
                     clothingElements.forEach(clothingElement -> {
                         if (clothingElement.renderInfo() != null) {
-                            clothingElement.renderInfo().compile(
+                            clothingElement.renderInfo().render(
                                     matrixStack,
                                     bufferSource,
                                     light,
@@ -138,8 +138,7 @@ public class GenderLayerMixin<ENTITY extends LivingEntity, MODEL extends Humanoi
                                     renderer.getModel(),
                                     renderer.getModel(),
                                     (AbstractClientPlayer) entity,
-                                    left ? "lboob" : "rboob",
-                                    false
+                                    left ? "lboob" : "rboob"
                             );
                         }
                     });

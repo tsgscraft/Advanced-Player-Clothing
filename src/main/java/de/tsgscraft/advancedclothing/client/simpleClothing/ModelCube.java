@@ -9,29 +9,31 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.Map;
+
 public class ModelCube {
-    private final Polygon[] polygons;
+    private Polygon[] polygons;
     private final Vector3f origin;
     private final Vector3f dimensions;
     private final CubeDeformation grow;
     private final CubeRotation rotation;
     private final PartPose partPose;
 
-    public ModelCube(UVData uvData, float originX, float originY, float originZ, float dimensionX, float dimensionY, float dimensionZ, float growX, float growY, float growZ, CubeRotation rotation, PartPose partPose) {
+    public ModelCube(UVData uvData, float originX, float originY, float originZ, float dimensionX, float dimensionY, float dimensionZ, float growX, float growY, float growZ, CubeRotation rotation, PartPose partPose, Map<String, TextureData> textureDataMap) {
         this.origin = new Vector3f(originX, originY, originZ);
         this.dimensions = new Vector3f(dimensionX, dimensionY, dimensionZ);
         this.grow = new CubeDeformation(growX, growY, growZ);
         this.rotation = rotation;
         this.partPose = partPose;
-        this.polygons = createPolygons(uvData);
-        AdvancedClothing.LOGGER.debug("ModelCube created with origin: {}, dimensions: {}, grow: {}, rotation: {}", origin, dimensions, grow, rotation);
+        this.polygons = createPolygons(uvData, textureDataMap);
     }
 
-    private Polygon[] createPolygons(UVData uvData) {
+    private Polygon[] createPolygons(UVData uvData, Map<String, TextureData> textureDataMap) {
         float f = origin.x() + dimensions.x() + grow.growX;
         float f1 = origin.y() + dimensions.y() + grow.growY;
         float f2 = origin.z() + dimensions.z() + grow.growZ;
@@ -46,19 +48,24 @@ public class ModelCube {
         Vertex modelpart$vertex6 = new Vertex(origin.x(), f1, f2, 8.0F, 0.0F).rotateWithPivot(rotation);
         int i = 0;
 
-        if (uvData.UP() != null)
-            polygons[i++] = new Polygon(new Vertex[]{modelpart$vertex2, modelpart$vertex1, modelpart$vertex5, modelpart$vertex6}, uvData.UP().u1, uvData.UP().v1, uvData.UP().u2, uvData.UP().v2, uvData.UP().texture().width(), uvData.UP().texture().height(), false, Direction.UP, uvData.UP().texture().location(), uvData.UP().texture().debugTexture());
-        if (uvData.DOWN() != null)
-            polygons[i++] = new Polygon(new Vertex[]{modelpart$vertex3, modelpart$vertex4, modelpart$vertex, modelpart$vertex7}, uvData.DOWN().u1, uvData.DOWN().v1, uvData.DOWN().u2, uvData.DOWN().v2, uvData.DOWN().texture().width(), uvData.DOWN().texture().height(), false, Direction.DOWN, uvData.DOWN().texture().location(), uvData.DOWN().texture().debugTexture());
-        if (uvData.WEST() != null)
-            polygons[i++] = new Polygon(new Vertex[]{modelpart$vertex5, modelpart$vertex1, modelpart$vertex, modelpart$vertex4}, uvData.WEST().u1, uvData.WEST().v1, uvData.WEST().u2, uvData.WEST().v2, uvData.WEST().texture().width(), uvData.WEST().texture().height(), false, Direction.WEST, uvData.WEST().texture().location(), uvData.WEST().texture().debugTexture());
-        if (uvData.NORTH() != null)
-            polygons[i++] = new Polygon(new Vertex[]{modelpart$vertex1, modelpart$vertex2, modelpart$vertex7, modelpart$vertex}, uvData.NORTH().u1, uvData.NORTH().v1, uvData.NORTH().u2, uvData.NORTH().v2, uvData.NORTH().texture().width(), uvData.NORTH().texture().height(), false, Direction.NORTH, uvData.NORTH().texture().location(), uvData.NORTH().texture().debugTexture());
-        if (uvData.EAST() != null)
-            polygons[i++] = new Polygon(new Vertex[]{modelpart$vertex2, modelpart$vertex6, modelpart$vertex3, modelpart$vertex7}, uvData.EAST().u1, uvData.EAST().v1, uvData.EAST().u2, uvData.EAST().v2, uvData.EAST().texture().width(), uvData.EAST().texture().height(), false, Direction.EAST, uvData.EAST().texture().location(), uvData.EAST().texture().debugTexture());
-        if (uvData.SOUTH() != null)
-            polygons[i] = new Polygon(new Vertex[]{modelpart$vertex6, modelpart$vertex5, modelpart$vertex4, modelpart$vertex3}, uvData.SOUTH().u1, uvData.SOUTH().v1, uvData.SOUTH().u2,	uvData.SOUTH().v2,	uvData.SOUTH().texture().width(),	uvData.SOUTH().texture().height(), false, Direction.SOUTH, uvData.SOUTH().texture().location(), uvData.SOUTH().texture().debugTexture());
-
+        if (uvData.UP() != null) {
+            polygons[i++] = new Polygon(new Vertex[]{modelpart$vertex2, modelpart$vertex1, modelpart$vertex5, modelpart$vertex6}, uvData.UP().u1, uvData.UP().v1, uvData.UP().u2, uvData.UP().v2, textureDataMap.get(uvData.UP().textureId).width(), textureDataMap.get(uvData.UP().textureId).height(), false, Direction.UP, textureDataMap.get(uvData.UP().textureId).location(), textureDataMap.get(uvData.UP().textureId).debugTexture());
+        }
+        if (uvData.DOWN() != null) {
+            polygons[i++] = new Polygon(new Vertex[]{modelpart$vertex3, modelpart$vertex4, modelpart$vertex, modelpart$vertex7}, uvData.DOWN().u1, uvData.DOWN().v1, uvData.DOWN().u2, uvData.DOWN().v2, textureDataMap.get(uvData.DOWN().textureId).width(), textureDataMap.get(uvData.DOWN().textureId).height(), false, Direction.DOWN, textureDataMap.get(uvData.DOWN().textureId).location(), textureDataMap.get(uvData.DOWN().textureId).debugTexture());
+        }
+        if (uvData.WEST() != null) {
+            polygons[i++] = new Polygon(new Vertex[]{modelpart$vertex5, modelpart$vertex1, modelpart$vertex, modelpart$vertex4}, uvData.WEST().u1, uvData.WEST().v1, uvData.WEST().u2, uvData.WEST().v2, textureDataMap.get(uvData.WEST().textureId).width(), textureDataMap.get(uvData.WEST().textureId).height(), false, Direction.WEST, textureDataMap.get(uvData.WEST().textureId).location(), textureDataMap.get(uvData.WEST().textureId).debugTexture());
+        }
+        if (uvData.NORTH() != null) {
+            polygons[i++] = new Polygon(new Vertex[]{modelpart$vertex1, modelpart$vertex2, modelpart$vertex7, modelpart$vertex}, uvData.NORTH().u1, uvData.NORTH().v1, uvData.NORTH().u2, uvData.NORTH().v2, textureDataMap.get(uvData.NORTH().textureId).width(), textureDataMap.get(uvData.NORTH().textureId).height(), false, Direction.NORTH, textureDataMap.get(uvData.NORTH().textureId).location(), textureDataMap.get(uvData.NORTH().textureId).debugTexture());
+        }
+        if (uvData.EAST() != null) {
+            polygons[i++] = new Polygon(new Vertex[]{modelpart$vertex2, modelpart$vertex6, modelpart$vertex3, modelpart$vertex7}, uvData.EAST().u1, uvData.EAST().v1, uvData.EAST().u2, uvData.EAST().v2, textureDataMap.get(uvData.EAST().textureId).width(), textureDataMap.get(uvData.EAST().textureId).height(), false, Direction.EAST, textureDataMap.get(uvData.EAST().textureId).location(), textureDataMap.get(uvData.EAST().textureId).debugTexture());
+        }
+        if (uvData.SOUTH() != null) {
+            polygons[i] = new Polygon(new Vertex[]{modelpart$vertex6, modelpart$vertex5, modelpart$vertex4, modelpart$vertex3}, uvData.SOUTH().u1, uvData.SOUTH().v1, uvData.SOUTH().u2, uvData.SOUTH().v2, textureDataMap.get(uvData.SOUTH().textureId).width(), textureDataMap.get(uvData.SOUTH().textureId).height(), false, Direction.SOUTH, textureDataMap.get(uvData.SOUTH().textureId).location(), textureDataMap.get(uvData.SOUTH().textureId).debugTexture());
+        }
         /*
         polygons[i++] = new Polygon(new Vertex[]{modelpart$vertex4, modelpart$vertex3, modelpart$vertex7, modelpart$vertex}, f5, f10, f6, f11, texScaleU, texScaleV, false, Direction.DOWN);
         polygons[i++] = new Polygon(new Vertex[]{modelpart$vertex1, modelpart$vertex2, modelpart$vertex6, modelpart$vertex5}, f6, f11, f7, f10, texScaleU, texScaleV, false, Direction.UP);
@@ -70,11 +77,12 @@ public class ModelCube {
         return polygons;
     }
 
-    public void compile(PoseStack.Pose pose, MultiBufferSource buffer, int packedLight, int packedOverlay, int color) {
+    public void compile(PoseStack.Pose pose, MultiBufferSource buffer, int packedLight, int packedOverlay,
+                        int color) {
         Matrix4f matrix4f = pose.pose();
         Vector3f vector3f = new Vector3f();
 
-        for(Polygon modelpart$polygon : this.polygons) {
+        for (Polygon modelpart$polygon : this.polygons) {
             if (modelpart$polygon == null) {
                 continue;
             }
@@ -82,8 +90,9 @@ public class ModelCube {
             float f = vector3f1.x();
             float f1 = vector3f1.y();
             float f2 = vector3f1.z();
+
             VertexConsumer vertexConsumer = (Config.debug && modelpart$polygon.debugTextureId != null) ? buffer.getBuffer(RenderType.entityTranslucent(modelpart$polygon.debugTextureId)) : buffer.getBuffer(RenderType.entityTranslucent(modelpart$polygon.textureId));
-            for(Vertex modelpart$vertex : modelpart$polygon.vertices) {
+            for (Vertex modelpart$vertex : modelpart$polygon.vertices) {
                 float f3 = modelpart$vertex.pos.x() / 16.0F;
                 float f4 = modelpart$vertex.pos.y() / 16.0F;
                 float f5 = modelpart$vertex.pos.z() / 16.0F;
@@ -116,7 +125,7 @@ public class ModelCube {
             if (mirror) {
                 int i = vertices.length;
 
-                for(int j = 0; j < i / 2; ++j) {
+                for (int j = 0; j < i / 2; ++j) {
                     Vertex modelpart$vertex = vertices[j];
                     vertices[j] = vertices[i - 1 - j];
                     vertices[i - 1 - j] = modelpart$vertex;
@@ -157,10 +166,11 @@ public class ModelCube {
         }
     }
 
-    public record UVData(FaceData UP, FaceData DOWN, FaceData WEST, FaceData NORTH, FaceData EAST, FaceData SOUTH) {
+    public record UVData(FaceData UP, FaceData DOWN, FaceData WEST, FaceData NORTH, FaceData EAST,
+                         FaceData SOUTH) {
     }
 
-    public record FaceData(float u1, float v1, float u2, float v2, TextureData texture) {
+    public record FaceData(float u1, float v1, float u2, float v2, String textureId) {
 
     }
 }

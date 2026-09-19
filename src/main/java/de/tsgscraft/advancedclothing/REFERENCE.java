@@ -22,6 +22,8 @@ public class REFERENCE {
     public static ResourceLocation debugSkin = ResourceLocation.parse("advancedclothing:textures/entity/player_debug.png");
     public static ResourceLocation customSkin = ResourceLocation.parse("advancedclothing:textures/entity/player.png");
 
+    public static boolean isClientSlim = false;
+
 
 
 

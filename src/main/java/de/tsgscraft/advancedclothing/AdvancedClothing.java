@@ -28,6 +28,7 @@ public class AdvancedClothing {
     private static ClothingRegistry clothingRegistry;
 
     public AdvancedClothing(IEventBus modEventBus, ModContainer modContainer) {
+        AdvancedClothing.getClothingRegistry();
         ClothingAttachments.ATTACHMENTS.register(modEventBus);
 
         AdvancedClothing.modEventBus = modEventBus;

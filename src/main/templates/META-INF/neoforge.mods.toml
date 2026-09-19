@@ -11,6 +11,7 @@ authors = "${mod_authors}"
 description = '''${mod_description}'''
 modUrl="https://modrinth.com/mod/advanced-player-clothing"
 displayURL="https://modrinth.com/mod/advanced-player-clothing"
+# updateJSONURL="https://api.modrinth.com/updates/advanced-player-clothing/forge_updates.json?neoforge=only"
 
 [[mixins]]
 config = "${mod_id}.mixins.json"

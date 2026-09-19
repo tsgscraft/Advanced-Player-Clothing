@@ -1,5 +1,9 @@
 package de.tsgscraft.advancedclothing.client;
 
+import de.tsgscraft.advancedclothing.client.simpleClothing.ClothingModel;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,6 +24,8 @@ public class ClothingRegistry {
     private List<String> clothingIds;
     private Map<String, List<String>> clothingTypeToIdMap;
     private Map<String, List<ClothingElement>> clothingTypeToElementMap;
+
+    private Map<ResourceLocation, ClothingModel> clothingModelMap = new HashMap<>();
 
     public void setClothingElements(List<ClothingElement> clothingElements) {
         this.clothingElements = clothingElements;
@@ -55,5 +61,25 @@ public class ClothingRegistry {
 
     public Map<String, List<ClothingElement>> getClothingTypeToElementMap() {
         return clothingTypeToElementMap;
+    }
+
+    public Map<ResourceLocation, ClothingModel> getClothingModelMap() {
+        return clothingModelMap;
+    }
+
+    public void setClothingModelMap(Map<ResourceLocation, ClothingModel> clothingModelMap) {
+        this.clothingModelMap = clothingModelMap;
+    }
+
+    public void registerClothingModel(ResourceLocation modelLocation, ClothingModel clothingModel) {
+        clothingModelMap.put(modelLocation, clothingModel);
+    }
+
+    public ClothingModel getClothingModel(ResourceLocation modelLocation) {
+        return clothingModelMap.get(modelLocation);
+    }
+
+    public boolean hasModelRegistered(ResourceLocation modelLocation) {
+        return clothingModelMap.containsKey(modelLocation);
     }
 }

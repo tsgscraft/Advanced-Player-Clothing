@@ -1,16 +1,10 @@
-package de.tsgscraft.advancedclothing.client;
+package de.tsgscraft.advancedclothing.client.simpleClothing;
 
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
-import de.tsgscraft.advancedclothing.Config;
 import de.tsgscraft.advancedclothing.client.anchor.Anchors;
 import de.tsgscraft.advancedclothing.client.anchor.ClothingAnchor;
 import de.tsgscraft.advancedclothing.client.anchor.ClothingAnchorInfo;
-import de.tsgscraft.advancedclothing.client.render.AnchorLayer;
-import de.tsgscraft.advancedclothing.client.simpleClothing.CubeDefinition;
-import de.tsgscraft.advancedclothing.client.simpleClothing.Model;
-import de.tsgscraft.advancedclothing.client.simpleClothing.ModelCube;
-import de.tsgscraft.advancedclothing.mixin.PlayerModelAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.model.PlayerModel;
@@ -28,41 +22,40 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ClothingRendering {
+public class ClothingModel {
     private final Map<ClothingAnchorInfo, List<CubeDefinition>> cubesWithAnchor;
     private final Map<ClothingAnchorInfo, Model> bakedCubesWithAnchor;
 
-    private final Map<ClothingAnchorInfo, List<CubeDefinition>> slimCubesWithAnchor;
-    private final Map<ClothingAnchorInfo, Model> slimBakedCubesWithAnchor;
-
     private boolean isBaked = false;
-    private final boolean hasModel; // Steve variant
-    private final boolean hasSlimModel; // Alex variant
 
-    public ClothingRendering(Map<ClothingAnchorInfo, List<CubeDefinition>> cubesWithAnchor, Map<ClothingAnchorInfo, List<CubeDefinition>> slimCubesWithAnchor) {
+    public ClothingModel(Map<ClothingAnchorInfo, List<CubeDefinition>> cubesWithAnchor) {
         this.cubesWithAnchor = cubesWithAnchor;
         this.bakedCubesWithAnchor = new HashMap<>();
-        this.slimCubesWithAnchor = slimCubesWithAnchor;
-        this.slimBakedCubesWithAnchor = new HashMap<>();
-        this.hasModel = cubesWithAnchor != null && !cubesWithAnchor.isEmpty();
-        this.hasSlimModel = slimCubesWithAnchor != null && !slimCubesWithAnchor.isEmpty();
     }
 
-    public void bake() {
-        if (hasModel) {
-            bake(cubesWithAnchor, bakedCubesWithAnchor);
+    public ClothingModel setup(Map<String, TextureData> textureDataMap) {
+        Map<ClothingAnchorInfo, List<CubeDefinition>> clonedCubesWithAnchor = new HashMap<>();
+        for (Map.Entry<ClothingAnchorInfo, List<CubeDefinition>> entry : cubesWithAnchor.entrySet()) {
+            List<CubeDefinition> clonedCubes = new ArrayList<>();
+            for (CubeDefinition cube : entry.getValue()) {
+                clonedCubes.add(cube.cloneCube());
+            }
+            clonedCubesWithAnchor.put(entry.getKey(), clonedCubes);
         }
-        if (hasSlimModel) {
-            bake(slimCubesWithAnchor, slimBakedCubesWithAnchor);
-        }
+        return new ClothingModel(clonedCubesWithAnchor).bake(textureDataMap);
+    }
+
+    public ClothingModel bake(Map<String, TextureData> textureDataMap) {
+        bake(cubesWithAnchor, bakedCubesWithAnchor, textureDataMap);
         isBaked = true;
+        return this;
     }
 
-    private void bake(Map<ClothingAnchorInfo, List<CubeDefinition>> cubesWithAnchor, Map<ClothingAnchorInfo, Model> bakedCubesWithAnchor) {
+    private void bake(Map<ClothingAnchorInfo, List<CubeDefinition>> cubesWithAnchor, Map<ClothingAnchorInfo, Model> bakedCubesWithAnchor, Map<String, TextureData> textureDataMap) {
         for (Map.Entry<ClothingAnchorInfo, List<CubeDefinition>> entry : cubesWithAnchor.entrySet()) {
             List<ModelCube> modelCubes = new ArrayList<>();
             for (CubeDefinition cube : entry.getValue()) {
-                ModelCube bakedCube = cube.bake();
+                ModelCube bakedCube = cube.bake(textureDataMap);
                 modelCubes.add(bakedCube);
             }
             bakedCubesWithAnchor.put(entry.getKey(), new Model(modelCubes));
@@ -77,26 +70,11 @@ public class ClothingRendering {
         return bakedCubesWithAnchor;
     }
 
-    public Map<ClothingAnchorInfo, Model> getSlimBakedCubesWithAnchor() {
-        return slimBakedCubesWithAnchor;
-    }
-
     public void compile(PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, int color, PlayerModel<?> model, PlayerModel<?> anchorLayer, AbstractClientPlayer player, String renderKey, boolean usePlayerRotation) {
         if (!isBaked) {
-            bake();
-        }
-
-        if (Config.onlyBreasts && !(renderKey.equals("lboob") || renderKey.equals("rboob"))) {
             return;
         }
-
-        if (isSlim(model) && hasSlimModel) {
-            compileWithAnchor(poseStack, buffer, packedLight, packedOverlay, color, anchorLayer, player, slimBakedCubesWithAnchor, renderKey, usePlayerRotation);
-        } else if (hasModel) {
-            compileWithAnchor(poseStack, buffer, packedLight, packedOverlay, color, anchorLayer, player, bakedCubesWithAnchor, renderKey, usePlayerRotation);
-        } else if (hasSlimModel) {
-            compileWithAnchor(poseStack, buffer, packedLight, packedOverlay, color, anchorLayer, player, slimBakedCubesWithAnchor, renderKey, usePlayerRotation);
-        }
+        compileWithAnchor(poseStack, buffer, packedLight, packedOverlay, color, anchorLayer, player, bakedCubesWithAnchor, renderKey, usePlayerRotation);
     }
 
     private void compileWithAnchor(GuiGraphics guiGraphics, int packedLight, int packedOverlay, int color, PlayerModel<?> model, AbstractClientPlayer player, Map<ClothingAnchorInfo, Model> bakedCubesWithAnchor, String renderKey) {
@@ -132,18 +110,6 @@ public class ClothingRendering {
             }
             poseStack.popPose();
         }
-    }
-
-    private boolean isSlim(PlayerModel<?> model) {
-        return ((PlayerModelAccessor) model).isSlim();
-    }
-
-    public boolean hasModel() {
-        return hasModel;
-    }
-
-    public boolean hasSlimModel() {
-        return hasSlimModel;
     }
 
     public void renderInInventory(GuiGraphics guiGraphics, int x, int y, int width, int height, float partialTick, int mouseX, int mouseY) {
@@ -215,14 +181,7 @@ public class ClothingRendering {
         guiGraphics.pose().mulPose(new Quaternionf().rotateXYZ((float)Math.PI, 0.0F, 0.0F));
         Lighting.setupForEntityInInventory();
         PlayerRenderer renderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(entity);
-        PlayerModel<?> model = renderer.getModel();
-        if (isSlim(model) && hasSlimModel) {
-            compileWithAnchor(guiGraphics, 15728880, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF, renderer.getModel(), entity, slimBakedCubesWithAnchor, "generic");
-        } else if (hasModel) {
-            compileWithAnchor(guiGraphics, 15728880, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF, renderer.getModel(), entity, bakedCubesWithAnchor, "generic");
-        } else if (hasSlimModel) {
-            compileWithAnchor(guiGraphics, 15728880, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF, renderer.getModel(), entity, slimBakedCubesWithAnchor, "generic");
-        }
+        compileWithAnchor(guiGraphics, 15728880, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF, renderer.getModel(), entity, bakedCubesWithAnchor, "generic");
         guiGraphics.bufferSource().endBatch();
         guiGraphics.pose().popPose();
         Lighting.setupFor3DItems();

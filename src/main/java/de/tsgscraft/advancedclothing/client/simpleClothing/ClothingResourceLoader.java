@@ -8,7 +8,8 @@ import com.google.gson.JsonParser;
 import de.tsgscraft.advancedclothing.AdvancedClothing;
 import de.tsgscraft.advancedclothing.REFERENCE;
 import de.tsgscraft.advancedclothing.client.ClothingElement;
-import de.tsgscraft.advancedclothing.client.ClothingRendering;
+import de.tsgscraft.advancedclothing.client.ClothingRegistry;
+import de.tsgscraft.advancedclothing.client.render.ClothingRendering;
 import de.tsgscraft.advancedclothing.client.anchor.ClothingAnchorInfo;
 import de.tsgscraft.advancedclothing.client.modifiers.ClothingModifiers;
 import net.minecraft.client.model.geom.PartPose;
@@ -17,6 +18,7 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
+import org.checkerframework.checker.units.qual.C;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -28,6 +30,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public class ClothingResourceLoader implements PreparableReloadListener {
+
+    /*
+    TODO: Load a model once and then use it for all clothing elements that use the same model. Improves loading time and reduces memory usage.
+     */
 
     @Override
     public CompletableFuture<Void> reload(
@@ -106,16 +112,19 @@ public class ClothingResourceLoader implements PreparableReloadListener {
                             textureDataMap.put(textureId, textureData);
                         }
 
-                        Map<ClothingAnchorInfo, List<CubeDefinition>> slimModelData = null;
-                        if (clothingJson.has("slim_model")) {
-                            slimModelData = loadModel(resourceManager.getResource(ResourceLocation.parse(clothingJson.get("slim_model").getAsString())).get(), textureDataMap);
-                        }
-                        Map<ClothingAnchorInfo, List<CubeDefinition>> modelData = null;
+                        ResourceLocation modelDataLocation = null;
                         if (clothingJson.has("model")) {
-                            modelData = loadModel(resourceManager.getResource(ResourceLocation.parse(clothingJson.get("model").getAsString())).get(), textureDataMap);
+                            modelDataLocation = ResourceLocation.parse(clothingJson.get("model").getAsString());
+                            checkModel(modelDataLocation, resourceManager, clothingDataLocation);
                         }
 
-                        result.add(new ClothingElement(new ClothingRendering(modelData, slimModelData), new ClothingModifiers(clothingJson.has("modifiers") ? clothingJson.get("modifiers").getAsJsonObject() : new JsonObject()), clothingName, clothingType.toString(), clothingDataLocation));
+                        ResourceLocation slimModelLocation = null;
+                        if (clothingJson.has("slim_model")) {
+                            slimModelLocation = ResourceLocation.parse(clothingJson.get("slim_model").getAsString());
+                            checkModel(slimModelLocation, resourceManager, clothingDataLocation);
+                        }
+
+                        result.add(new ClothingElement(new ClothingRendering(textureDataMap, modelDataLocation, slimModelLocation), new ClothingModifiers(clothingJson.has("modifiers") ? clothingJson.get("modifiers").getAsJsonObject() : new JsonObject()), clothingName, clothingType.toString(), clothingDataLocation));
                     } catch (Exception e) {
                         AdvancedClothing.LOGGER.error(
                                 "Failed to load model {} from resource pack {}",
@@ -149,19 +158,35 @@ public class ClothingResourceLoader implements PreparableReloadListener {
          */
     }
 
-    private Map<ClothingAnchorInfo, List<CubeDefinition>> loadModel(Resource key, Map<String, TextureData> texture) {
+    private void checkModel(ResourceLocation modelLocation, ResourceManager resourceManager, ResourceLocation clothingDataLocation) {
+        boolean registered = ClothingRegistry.getInstance().hasModelRegistered(modelLocation);
+        if (!registered) {
+            Resource resource = resourceManager.getResource(modelLocation).orElse(null);
+            if (resource == null) {
+                AdvancedClothing.LOGGER.warn("Failed to find model for location: {} referenced in clothing data: {}", modelLocation, clothingDataLocation);
+                return;
+            }
+            Map<ClothingAnchorInfo, List<CubeDefinition>> modelData = loadModel(resource);
+            ClothingRegistry.getInstance().registerClothingModel(modelLocation, new ClothingModel(modelData));
+            AdvancedClothing.LOGGER.info("Registered model for location: {} from clothing data: {}", modelLocation, clothingDataLocation);
+        }else {
+            AdvancedClothing.LOGGER.info("Model already registered for location: {} from clothing data: {}", modelLocation, clothingDataLocation);
+        }
+    }
+
+    private Map<ClothingAnchorInfo, List<CubeDefinition>> loadModel(Resource key) {
         try (Reader reader = key.openAsReader()) {
 
             JsonObject json =
                     JsonParser.parseReader(reader).getAsJsonObject();
 
-            return loadModel(json, texture);
+            return loadModel(json);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Map<ClothingAnchorInfo, List<CubeDefinition>> loadModel(JsonObject model, Map<String, TextureData> texture) {
+    private Map<ClothingAnchorInfo, List<CubeDefinition>> loadModel(JsonObject model) {
         Map<ClothingAnchorInfo, List<CubeDefinition>> cubes = new HashMap<>();
         JsonArray anchors = model.getAsJsonArray("anchors");
         for (int i = 0; i < anchors.size(); i++) {
@@ -191,7 +216,7 @@ public class ClothingResourceLoader implements PreparableReloadListener {
                 );
             }
             JsonArray elements = anchorObject.getAsJsonArray("elements");
-            CubeListBuilder cubeListBuilder = CubeListBuilder.create(anchorInfo);
+            CubeListBuilder cubeListBuilder = new CubeListBuilder();
             for (int j = 0; j < elements.size(); j++) {
                 JsonObject elementObject = elements.get(j).getAsJsonObject();
 
@@ -234,7 +259,7 @@ public class ClothingResourceLoader implements PreparableReloadListener {
                     }
                 }
 
-                cubeListBuilder.texOffs(getUvData(elementObject.getAsJsonObject("faces"), texture));
+                cubeListBuilder.texOffs(getUvData(elementObject.getAsJsonObject("faces")));
                 cubeListBuilder.addBox(fromX, fromY, fromZ, toX - fromX, toY - fromY, toZ - fromZ, rotation, PartPose.offset(offsetX, offsetY, offsetZ));
             }
             cubes.put(anchorInfo, cubeListBuilder.getCubes());
@@ -242,25 +267,25 @@ public class ClothingResourceLoader implements PreparableReloadListener {
         return cubes;
     }
 
-    private ModelCube.UVData getUvData(JsonObject elementObject, Map<String, TextureData> textureDataMap) {
+    private ModelCube.UVData getUvData(JsonObject elementObject) {
         ModelCube.FaceData north = null;
         if (elementObject.has("north"))
-            north = getFaceData(elementObject.getAsJsonObject("north"), textureDataMap);
+            north = getFaceData(elementObject.getAsJsonObject("north"));
         ModelCube.FaceData south = null;
         if (elementObject.has("south"))
-            south = getFaceData(elementObject.getAsJsonObject("south"), textureDataMap);
+            south = getFaceData(elementObject.getAsJsonObject("south"));
         ModelCube.FaceData east = null;
         if (elementObject.has("east"))
-            east = getFaceData(elementObject.getAsJsonObject("east"), textureDataMap);
+            east = getFaceData(elementObject.getAsJsonObject("east"));
         ModelCube.FaceData west = null;
         if (elementObject.has("west"))
-            west = getFaceData(elementObject.getAsJsonObject("west"), textureDataMap);
+            west = getFaceData(elementObject.getAsJsonObject("west"));
         ModelCube.FaceData up = null;
         if (elementObject.has("up"))
-            up = getFaceData(elementObject.getAsJsonObject("up"), textureDataMap);
+            up = getFaceData(elementObject.getAsJsonObject("up"));
         ModelCube.FaceData down = null;
         if (elementObject.has("down"))
-            down = getFaceData(elementObject.getAsJsonObject("down"), textureDataMap);
+            down = getFaceData(elementObject.getAsJsonObject("down"));
         return new ModelCube.UVData(
                 up,
                 down,
@@ -271,17 +296,13 @@ public class ClothingResourceLoader implements PreparableReloadListener {
         );
     }
 
-    private ModelCube.FaceData getFaceData(JsonObject faceObject, Map<String, TextureData> textureDataMap) {
+    private ModelCube.FaceData getFaceData(JsonObject faceObject) {
         JsonArray uvArray = faceObject.getAsJsonArray("uv");
         float u1 = uvArray.get(0).getAsFloat();
         float v1 = uvArray.get(1).getAsFloat();
         float u2 = uvArray.get(2).getAsFloat();
         float v2 = uvArray.get(3).getAsFloat();
         String textureId = faceObject.get("texture").getAsString();
-        TextureData textureData = textureDataMap.get(textureId);
-        if (textureData == null) {
-            textureData = TextureData.DEFAULT;
-        }
-        return new ModelCube.FaceData(u1, v1, u2, v2, textureData);
+        return new ModelCube.FaceData(u1, v1, u2, v2, textureId);
     }
 }

@@ -94,7 +94,7 @@ public class AnchorLayerRender extends RenderLayer<AbstractClientPlayer, PlayerM
 
         clothingElements.forEach(clothingElement -> {
             if (clothingElement.renderInfo() != null) {
-                clothingElement.renderInfo().compile(
+                clothingElement.renderInfo().render(
                         poseStack,
                         buffer,
                         light,
@@ -103,8 +103,7 @@ public class AnchorLayerRender extends RenderLayer<AbstractClientPlayer, PlayerM
                         parent,
                         layer,
                         entity,
-                        "generic",
-                        false
+                        "generic"
                 );
             }
             /*
