@@ -84,11 +84,6 @@ public class ClothingRegistry {
     }
 
     public void clear() {
-        this.clothingElements = null;
-        this.clothingTypes = null;
-        this.clothingIds = null;
-        this.clothingTypeToIdMap = null;
-        this.clothingTypeToElementMap = null;
         this.clothingModelMap.clear();
     }
 }
