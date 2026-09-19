@@ -58,6 +58,7 @@ public class ClothingResourceLoader implements PreparableReloadListener {
     }
 
     private List<ClothingElement> loadClothing(ResourceManager resourceManager) {
+        ClothingRegistry.getInstance().clear();
         List<ClothingElement> result = new ArrayList<>();
 
         ResourceLocation location =

@@ -82,4 +82,13 @@ public class ClothingRegistry {
     public boolean hasModelRegistered(ResourceLocation modelLocation) {
         return clothingModelMap.containsKey(modelLocation);
     }
+
+    public void clear() {
+        this.clothingElements = null;
+        this.clothingTypes = null;
+        this.clothingIds = null;
+        this.clothingTypeToIdMap = null;
+        this.clothingTypeToElementMap = null;
+        this.clothingModelMap.clear();
+    }
 }
