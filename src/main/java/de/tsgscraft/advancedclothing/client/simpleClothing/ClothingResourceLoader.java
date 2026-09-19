@@ -31,10 +31,6 @@ import java.util.concurrent.Executor;
 
 public class ClothingResourceLoader implements PreparableReloadListener {
 
-    /*
-    TODO: Load a model once and then use it for all clothing elements that use the same model. Improves loading time and reduces memory usage.
-     */
-
     @Override
     public CompletableFuture<Void> reload(
             PreparationBarrier barrier,
