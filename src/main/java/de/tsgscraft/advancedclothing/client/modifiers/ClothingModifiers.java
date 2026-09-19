@@ -84,14 +84,6 @@ public class ClothingModifiers {
             }
         }
 
-        System.out.println("Combined Modifiers for player " + player.getName().getString() + ":");
-        System.out.println("Head: " + combinedHeadModifiers);
-        System.out.println("Body: " + combinedBodyModifiers);
-        System.out.println("Left Arm: " + combinedLeftArmModifiers);
-        System.out.println("Right Arm: " + combinedRightArmModifiers);
-        System.out.println("Left Leg: " + combinedLeftLegModifiers);
-        System.out.println("Right Leg: " + combinedRightLegModifiers);
-
         Map<Integer, ModelPartModifiers> combinedModifiers = new HashMap<>();
         combinedModifiers.put(0, combinedHeadModifiers);
         combinedModifiers.put(1, combinedBodyModifiers);
