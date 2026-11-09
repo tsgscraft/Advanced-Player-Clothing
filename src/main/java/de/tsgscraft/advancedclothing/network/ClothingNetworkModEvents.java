@@ -6,6 +6,7 @@ import de.tsgscraft.advancedclothing.network.clothing.*;
 import de.tsgscraft.advancedclothing.network.plugin.TestForServerPayload;
 import de.tsgscraft.advancedclothing.network.plugin.TestForServerReturnPayload;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -92,11 +93,12 @@ public class ClothingNetworkModEvents {
                 (payload, context) -> {
                     context.enqueueWork(() -> {
                         // Send back a response to the client
-                        context.connection().send(
-                                new ServerboundCustomPayloadPacket(
-                                        new TestForServerReturnPayload((byte) 1)
-                                )
-                        );
+                        if (context.player() instanceof ServerPlayer player) {
+                            PacketDistributor.sendToPlayer(
+                                    player,
+                                    new TestForServerReturnPayload((byte) 1)
+                            );
+                        }
                     });
                 }
         );
