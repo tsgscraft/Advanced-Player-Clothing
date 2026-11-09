@@ -1,4 +1,4 @@
-package de.tsgscraft.advancedclothing.compat;
+package de.tsgscraft.advancedclothing.client.compat;
 
 import dev.leo.sableplayerragdoll.api.RagdollAPI;
 import net.minecraft.server.level.ServerPlayer;

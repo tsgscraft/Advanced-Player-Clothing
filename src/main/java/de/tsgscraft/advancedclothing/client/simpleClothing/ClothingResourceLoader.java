@@ -8,7 +8,7 @@ import com.google.gson.JsonParser;
 import de.tsgscraft.advancedclothing.AdvancedClothing;
 import de.tsgscraft.advancedclothing.REFERENCE;
 import de.tsgscraft.advancedclothing.client.ClothingElement;
-import de.tsgscraft.advancedclothing.client.ClothingRegistry;
+import de.tsgscraft.advancedclothing.ClothingRegistry;
 import de.tsgscraft.advancedclothing.client.render.ClothingRendering;
 import de.tsgscraft.advancedclothing.client.anchor.ClothingAnchorInfo;
 import de.tsgscraft.advancedclothing.client.modifiers.ClothingModifiers;
@@ -18,11 +18,9 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.checkerframework.checker.units.qual.C;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +46,7 @@ public class ClothingResourceLoader implements PreparableReloadListener {
                 .thenCompose(barrier::wait)
                 .thenAcceptAsync(
                         loadedClothing -> {
-                            for (ClothingElement clothing : loadedClothing) {
+                            for (ClothingElement clothing : loadedClothing.values()) {
                                 clothing.renderInfo().bake();
                             }
                             AdvancedClothing.getClothingRegistry().setClothingElements(loadedClothing);
@@ -57,9 +55,9 @@ public class ClothingResourceLoader implements PreparableReloadListener {
                 );
     }
 
-    private List<ClothingElement> loadClothing(ResourceManager resourceManager) {
+    private Map<String,ClothingElement> loadClothing(ResourceManager resourceManager) {
         ClothingRegistry.getInstance().clear();
-        List<ClothingElement> result = new ArrayList<>();
+        Map<String, ClothingElement> result = new HashMap<>();
 
         ResourceLocation location =
                 ResourceLocation.fromNamespaceAndPath(
@@ -121,7 +119,7 @@ public class ClothingResourceLoader implements PreparableReloadListener {
                             checkModel(slimModelLocation, resourceManager, clothingDataLocation);
                         }
 
-                        result.add(new ClothingElement(new ClothingRendering(textureDataMap, modelDataLocation, slimModelLocation), new ClothingModifiers(clothingJson.has("modifiers") ? clothingJson.get("modifiers").getAsJsonObject() : new JsonObject()), clothingName, clothingType.toString(), clothingDataLocation));
+                        result.put(clothingDataLocation.toString(), new ClothingElement(new ClothingRendering(textureDataMap, modelDataLocation, slimModelLocation), new ClothingModifiers(clothingJson.has("modifiers") ? clothingJson.get("modifiers").getAsJsonObject() : new JsonObject()), clothingName, clothingType.toString(), clothingDataLocation));
                     } catch (Exception e) {
                         AdvancedClothing.LOGGER.error(
                                 "Failed to load model {} from resource pack {}",

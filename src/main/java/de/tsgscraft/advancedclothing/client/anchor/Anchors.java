@@ -1,9 +1,5 @@
 package de.tsgscraft.advancedclothing.client.anchor;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.world.entity.player.Player;
-
 import java.util.ArrayList;
 import java.util.List;
 

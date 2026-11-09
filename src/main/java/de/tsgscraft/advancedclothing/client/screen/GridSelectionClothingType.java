@@ -1,9 +1,8 @@
 package de.tsgscraft.advancedclothing.client.screen;
 
 import de.tsgscraft.advancedclothing.REFERENCE;
-import de.tsgscraft.advancedclothing.attachments.ClothingAttachments;
 import de.tsgscraft.advancedclothing.client.ClothingElement;
-import de.tsgscraft.advancedclothing.client.ClothingRegistry;
+import de.tsgscraft.advancedclothing.ClothingRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -64,7 +63,7 @@ public class GridSelectionClothingType extends GridSelectionItem<GridSelectionCl
         clothingElement.renderInfo().renderEntityInInventoryFollowsMouse(guiGraphics, itemX + 2, itemY + 16, itemX + itemWidth - 4, itemY + itemHeight - 4, 30, 0, mouseX, mouseY);
 
         Component typeName = Component.translatable(REFERENCE.MODID + ".type." + clothingType.split(":")[0] + "." + clothingType.split(":")[1]);
-        if (player.getData(ClothingAttachments.CLOTHING_DATA).containsKey(clothingType)) {
+        if (ClothingRegistry.getInstance().hasClothing(clothingType)) {
             typeName = typeName.copy().withStyle(ChatFormatting.UNDERLINE);
         }
         AbstractWidget.renderScrollingString(guiGraphics, Minecraft.getInstance().font, typeName, itemX+2, itemY+2, itemX + itemWidth - 2, itemY + 14, 0xFFFFFFFF);
@@ -73,9 +72,7 @@ public class GridSelectionClothingType extends GridSelectionItem<GridSelectionCl
     @Override
     public List<GridSelectionClothingType> sortItems(List<GridSelectionClothingType> oldItems) {
         List<GridSelectionClothingType> items = new ArrayList<>(oldItems);
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null) return items;
-        Map<String, String> types = player.getData(ClothingAttachments.CLOTHING_DATA);
+        Map<String, String> types = ClothingRegistry.getInstance().getActiveClothingElements();
         List<String> activeTypes = types.keySet().stream().toList();
         items.sort((item1, item2) -> {
             boolean item1Active = activeTypes.contains(item1.clothingType());

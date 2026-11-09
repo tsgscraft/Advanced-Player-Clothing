@@ -1,8 +1,7 @@
-package de.tsgscraft.advancedclothing.mixin;
+package de.tsgscraft.advancedclothing.client.mixin;
 
 import de.tsgscraft.advancedclothing.AdvancedClothing;
 import de.tsgscraft.advancedclothing.REFERENCE;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.LoadingModList;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -31,10 +30,10 @@ public class AdvancedClothingMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.equals("de.tsgscraft.advancedclothing.mixin.fmg.GenderLayerMixin")) {
+        if (mixinClassName.equals("de.tsgscraft.advancedclothing.client.mixin.fmg.GenderLayerMixin")) {
             return fmgModLoaded;
         }
-        if (mixinClassName.equals("de.tsgscraft.advancedclothing.mixin.rd.RagdollPartBlockEntityRendererMixin")) {
+        if (mixinClassName.equals("de.tsgscraft.advancedclothing.client.mixin.rd.RagdollPartBlockEntityRendererMixin")) {
             return rdModLoaded;
         }
         return true;

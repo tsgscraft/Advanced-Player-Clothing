@@ -2,13 +2,13 @@ package de.tsgscraft.advancedclothing.client;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import de.tsgscraft.advancedclothing.ClothingRegistry;
 import de.tsgscraft.advancedclothing.client.screen.ClothingSelectionScreen;
-import de.tsgscraft.advancedclothing.network.SetClothingPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 public class ClothingCommand {
     public static final LiteralArgumentBuilder<CommandSourceStack> Command = Commands.literal("advancedclothing")
@@ -32,9 +32,7 @@ public class ClothingCommand {
                                         if (context.getSource().getEntity() instanceof Player) {
                                             String key = StringArgumentType.getString(context, "key");
                                             String value = StringArgumentType.getString(context, "value");
-                                            PacketDistributor.sendToServer(
-                                                    new SetClothingPayload(key, value)
-                                            );
+                                            ClothingRegistry.getInstance().setClothing(key, value);
                                         }
                                         return 1;
                                     })
@@ -51,9 +49,7 @@ public class ClothingCommand {
                             .executes(context -> {
                                 if (context.getSource().getEntity() instanceof Player) {
                                     String key = StringArgumentType.getString(context, "key");
-                                    PacketDistributor.sendToServer(
-                                            new SetClothingPayload(key, "")
-                                    );
+                                    ClothingRegistry.getInstance().setClothing(key, "");
                                 }
                                 return 1;
                             })
@@ -61,6 +57,18 @@ public class ClothingCommand {
             ).then(Commands.literal("screen")
                     .executes(context -> {
                         Minecraft.getInstance().setScreen(new ClothingSelectionScreen());
+                        return 1;
+                    })
+            ).then(Commands.literal("getData")
+                    .then(Commands.argument("player", StringArgumentType.string())
+                            .executes(context -> {
+                                String name = StringArgumentType.getString(context, "player");
+                                return 1;
+                            }))
+                    .executes(context -> {
+                        if (context.getSource().getEntity() instanceof Player player) {
+                            player.sendSystemMessage(Component.literal(ClothingRegistry.getInstance().getActiveClothingElements().toString()));
+                        }
                         return 1;
                     })
             );

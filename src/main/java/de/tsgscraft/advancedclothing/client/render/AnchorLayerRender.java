@@ -4,13 +4,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import de.tsgscraft.advancedclothing.Config;
 import de.tsgscraft.advancedclothing.REFERENCE;
-import de.tsgscraft.advancedclothing.attachments.ClothingAttachments;
+import de.tsgscraft.advancedclothing.ClothingRegistry;
 import de.tsgscraft.advancedclothing.client.ClothingElement;
-import de.tsgscraft.advancedclothing.client.ClothingRegistry;
-import de.tsgscraft.advancedclothing.client.events.ClientModEvents;
+import de.tsgscraft.advancedclothing.events.ClientModEvents;
 import de.tsgscraft.advancedclothing.client.modifiers.ClothingModifiers;
 import de.tsgscraft.advancedclothing.client.modifiers.ModelPartModifiers;
-import de.tsgscraft.advancedclothing.mixin.PlayerModelAccessor;
+import de.tsgscraft.advancedclothing.client.mixin.PlayerModelAccessor;
 import dev.leo.sableplayerragdoll.block.entity.RagdollPartBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
@@ -25,7 +24,6 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.network.chat.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -60,16 +58,10 @@ public class AnchorLayerRender extends RenderLayer<AbstractClientPlayer, PlayerM
         PlayerModel<AbstractClientPlayer> parent = this.getParentModel();
         layer.setAllVisible(false);
         if (notRagdoll) {
-            layer.swimAmount = parent.swimAmount;
             parent.copyPropertiesTo(layer);
-            layer.setupAnim(
-                    entity,
-                    limbSwing,
-                    limbSwingAmount,
-                    age,
-                    headYaw,
-                    headPitch
-            );
+            layer.copyPlayerProperties(parent);
+            layer.swimAmount = parent.swimAmount;
+
             ClothingModifiers.configureSecondLayer(layer, entity.getUUID());
         }else {
             stopAnim(layer);
@@ -84,16 +76,11 @@ public class AnchorLayerRender extends RenderLayer<AbstractClientPlayer, PlayerM
             }
         }
 
-        Map<String, String> clothingData = entity.getData(ClothingAttachments.CLOTHING_DATA);
-
-        List<ClothingElement> clothingElements = ClothingRegistry.getInstance().getClothingElements().stream()
-                .filter(clothingElement -> clothingData.containsValue(clothingElement.id().toString()))
-                .toList();
-
         int overlay = LivingEntityRenderer.getOverlayCoords(entity, 0.0F);
 
-        clothingElements.forEach(clothingElement -> {
-            if (clothingElement.renderInfo() != null) {
+        ClothingRegistry.getInstance().getActiveClothingElements(entity.getUUID()).values().forEach(clothingElementId -> {
+            ClothingElement clothingElement = ClothingRegistry.getInstance().getClothingElements().get(clothingElementId);
+            if (clothingElement != null && clothingElement.renderInfo() != null) {
                 clothingElement.renderInfo().render(
                         poseStack,
                         buffer,
@@ -106,28 +93,6 @@ public class AnchorLayerRender extends RenderLayer<AbstractClientPlayer, PlayerM
                         "generic"
                 );
             }
-            /*
-            Map<String, ModelPartModifiers> extraModifiers = new HashMap<>();
-            boolean headBefore = layer.hat.visible;
-            boolean bodyBefore = layer.jacket.visible;
-            boolean leftArmBefore = layer.leftSleeve.visible;
-            boolean rightArmBefore = layer.rightSleeve.visible;
-            boolean leftLegBefore = layer.leftPants.visible;
-            boolean rightLegBefore = layer.rightPants.visible;
-            if (clothingElement.modifiers() != null) {
-                clothingElement.modifiers().configureSecondLayer(layer, parent, extraModifiers, entity.getUUID());
-            }
-            if (Config.debugModifiers) {
-                entity.sendSystemMessage(Component.literal("-------------------------------------------"));
-                entity.sendSystemMessage(Component.literal("headBefore: " + headBefore + " | headAfter: " + layer.hat.visible));
-                entity.sendSystemMessage(Component.literal("bodyBefore: " + bodyBefore + " | bodyAfter: " + layer.jacket.visible));
-                entity.sendSystemMessage(Component.literal("leftArmBefore: " + leftArmBefore + " | leftArmAfter: " + layer.leftSleeve.visible));
-                entity.sendSystemMessage(Component.literal("rightArmBefore: " + rightArmBefore + " | rightArmAfter: " + layer.rightSleeve.visible));
-                entity.sendSystemMessage(Component.literal("leftLegBefore: " + leftLegBefore + " | leftLegAfter: " + layer.leftPants.visible));
-                entity.sendSystemMessage(Component.literal("rightLegBefore: " + rightLegBefore + " | rightLegAfter: " + layer.rightPants.visible));
-            }
-            playerModifiers.put(entity.getUUID(), extraModifiers);
-             */
         });
 
         if (Config.onlyBreasts) {
@@ -143,15 +108,8 @@ public class AnchorLayerRender extends RenderLayer<AbstractClientPlayer, PlayerM
             copyVisibility(layer, slimLayer);
             if (notRagdoll) {
                 layer.copyPropertiesTo(slimLayer);
+                slimLayer.copyPlayerProperties(layer);
                 slimLayer.swimAmount = layer.swimAmount;
-                slimLayer.setupAnim(
-                        entity,
-                        limbSwing,
-                        limbSwingAmount,
-                        age,
-                        headYaw,
-                        headPitch
-                );
             }else {
                 stopAnim(slimLayer);
             }

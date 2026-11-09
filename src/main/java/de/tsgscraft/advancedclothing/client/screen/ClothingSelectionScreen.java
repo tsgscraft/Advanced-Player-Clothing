@@ -1,14 +1,12 @@
 package de.tsgscraft.advancedclothing.client.screen;
 
-import de.tsgscraft.advancedclothing.client.ClothingRegistry;
-import de.tsgscraft.advancedclothing.network.SetClothingPayload;
+import de.tsgscraft.advancedclothing.ClothingRegistry;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -36,9 +34,7 @@ public class ClothingSelectionScreen extends Screen {
         this.addRenderableWidget(this.gridSelectionTypeWidget);
 
         this.clearButton = new SimpleImageButton(this.width / 2 + 51, this.height / 2 - 100, 74, 20, Component.literal("Clear"), ResourceLocation.parse("advancedclothing:none"), () -> {
-            PacketDistributor.sendToServer(
-                    new SetClothingPayload(activeType, "")
-            );
+            ClothingRegistry.getInstance().setClothing(activeType, "");
         });
 
         this.backButton = new SimpleImageButton(this.width / 2 - 25, this.height / 2 - 100, 73, 20, Component.literal("Back"), ResourceLocation.parse("advancedclothing:back"), () -> {

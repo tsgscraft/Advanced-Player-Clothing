@@ -1,15 +1,13 @@
 package de.tsgscraft.advancedclothing.client.screen;
 
-import de.tsgscraft.advancedclothing.attachments.ClothingAttachments;
 import de.tsgscraft.advancedclothing.client.ClothingElement;
-import de.tsgscraft.advancedclothing.network.SetClothingPayload;
+import de.tsgscraft.advancedclothing.ClothingRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -23,9 +21,7 @@ public class GridSelectionClothingElement extends GridSelectionItem<GridSelectio
 
     @Override
     public void onClick(double x, double y, int button, ClothingSelectionScreen screen) {
-        PacketDistributor.sendToServer(
-                new SetClothingPayload(clothingElement.type(), clothingElement().id().toString())
-        );
+        ClothingRegistry.getInstance().setClothing(clothingElement.type(), clothingElement.id().toString());
     }
 
     @Override
@@ -57,7 +53,7 @@ public class GridSelectionClothingElement extends GridSelectionItem<GridSelectio
 
         Component name = Component.translatable(clothingElement.name());
 
-        if (player.getData(ClothingAttachments.CLOTHING_DATA).containsValue(clothingElement.id().toString())) {
+        if (ClothingRegistry.getInstance().hasClothing(clothingElement().type(), clothingElement().id().toString())) {
             name = name.copy().withStyle(ChatFormatting.UNDERLINE);
         }
 

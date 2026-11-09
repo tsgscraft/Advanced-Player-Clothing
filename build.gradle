@@ -52,6 +52,18 @@ repositories {
         }
         filter { includeGroupAndSubgroups('org.spongepowered') }
     }
+
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 base {
@@ -167,14 +179,11 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
-    compileOnly "com.wildfiregender.main:FemaleGenderMod:neoforge-${minecraft_version}-${fgm_version}"
-    runtimeOnly "com.wildfiregender.main:FemaleGenderMod:neoforge-${minecraft_version}-${fgm_version}"
+    implementation "maven.modrinth:bcOsQHnC:kKffHCGl"
 
-    compileOnly "dev.tr7zw:firstperson:neoforge-${firstperson_version}-mc${minecraft_version}"
-    runtimeOnly "dev.tr7zw:firstperson:neoforge-${firstperson_version}-mc${minecraft_version}"
+    implementation "maven.modrinth:H5XMjpHi:wcETD2Bu"
 
-    compileOnly "dev.leo.sableplayerragdoll:sable_player_ragdoll-${minecraft_version}:${ragdoll_version}"
-    runtimeOnly "dev.leo.sableplayerragdoll:sable_player_ragdoll-${minecraft_version}:${ragdoll_version}"
+    implementation "maven.modrinth:I3mWDgfy:CyKh8XSr"
 
     implementation("dev.ryanhcode.sable:sable-neoforge-${minecraft_version}:${sable_version}") {
         exclude group: 'foundry.veil'

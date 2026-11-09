@@ -1,13 +1,12 @@
-package de.tsgscraft.advancedclothing.mixin.fmg;
+package de.tsgscraft.advancedclothing.client.mixin.fmg;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.wildfire.render.WildfireModelRenderer;
 import de.tsgscraft.advancedclothing.Config;
 import de.tsgscraft.advancedclothing.REFERENCE;
-import de.tsgscraft.advancedclothing.attachments.ClothingAttachments;
+import de.tsgscraft.advancedclothing.ClothingRegistry;
 import de.tsgscraft.advancedclothing.client.ClothingElement;
-import de.tsgscraft.advancedclothing.client.ClothingRegistry;
 import de.tsgscraft.advancedclothing.client.modifiers.ModelPartModifiers;
 import de.tsgscraft.advancedclothing.client.render.AnchorLayerRender;
 import net.minecraft.client.Minecraft;
@@ -36,7 +35,6 @@ import net.neoforged.neoforge.client.ClientHooks;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.*;
 
-import java.util.List;
 import java.util.Map;
 
 @Mixin(targets = "com.wildfire.render.GenderLayer")
@@ -120,14 +118,9 @@ public class GenderLayerMixin<ENTITY extends LivingEntity, MODEL extends Humanoi
                 shiftForJacket(matrixStack);
                 // Apply any modifier values for the breast wear
                 if (Config.enabled) {
-                    Map<String, String> clothingData = entity.getData(ClothingAttachments.CLOTHING_DATA);
-
-                    List<ClothingElement> clothingElements = ClothingRegistry.getInstance().getClothingElements().stream()
-                            .filter(clothingElement -> clothingData.containsValue(clothingElement.id().toString()))
-                            .toList();
-
                     PlayerRenderer renderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(entity);
-                    clothingElements.forEach(clothingElement -> {
+                    ClothingRegistry.getInstance().getActiveClothingElements().values().forEach(clothingElementId -> {
+                        ClothingElement clothingElement = ClothingRegistry.getInstance().getClothingElements().get(clothingElementId);
                         if (clothingElement.renderInfo() != null) {
                             clothingElement.renderInfo().render(
                                     matrixStack,

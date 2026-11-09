@@ -1,32 +1,21 @@
 package de.tsgscraft.advancedclothing.client.render;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
-import de.tsgscraft.advancedclothing.AdvancedClothing;
 import de.tsgscraft.advancedclothing.Config;
 import de.tsgscraft.advancedclothing.REFERENCE;
-import de.tsgscraft.advancedclothing.client.ClothingRegistry;
-import de.tsgscraft.advancedclothing.client.anchor.Anchors;
-import de.tsgscraft.advancedclothing.client.anchor.ClothingAnchor;
-import de.tsgscraft.advancedclothing.client.anchor.ClothingAnchorInfo;
+import de.tsgscraft.advancedclothing.ClothingRegistry;
 import de.tsgscraft.advancedclothing.client.simpleClothing.*;
-import de.tsgscraft.advancedclothing.mixin.PlayerModelAccessor;
-import net.minecraft.client.Minecraft;
+import de.tsgscraft.advancedclothing.client.mixin.PlayerModelAccessor;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ClothingRendering {

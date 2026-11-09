@@ -1,7 +1,7 @@
 package de.tsgscraft.advancedclothing;
 
-import de.tsgscraft.advancedclothing.compat.FirstPersonMod;
-import de.tsgscraft.advancedclothing.compat.RagdollMod;
+import de.tsgscraft.advancedclothing.client.compat.FirstPersonMod;
+import de.tsgscraft.advancedclothing.client.compat.RagdollMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -24,6 +24,8 @@ public class REFERENCE {
 
     public static boolean isClientSlim = false;
 
+    public static boolean compatibleServer = false;
+
 
 
 
@@ -39,6 +41,7 @@ public class REFERENCE {
     public static final String fp_MODID = "firstperson";
 
     public static boolean skipHead = false;
+
     public static void updateFirstPerson() {
         skipHead = false;
         LocalPlayer player = Minecraft.getInstance().player;

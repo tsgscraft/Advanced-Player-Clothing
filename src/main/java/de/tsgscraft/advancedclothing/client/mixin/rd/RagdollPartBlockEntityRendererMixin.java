@@ -1,4 +1,4 @@
-package de.tsgscraft.advancedclothing.mixin.rd;
+package de.tsgscraft.advancedclothing.client.mixin.rd;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.tsgscraft.advancedclothing.Config;

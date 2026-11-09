@@ -1,13 +1,9 @@
-package de.tsgscraft.advancedclothing.client.events;
+package de.tsgscraft.advancedclothing.events;
 
 import de.tsgscraft.advancedclothing.Config;
 import de.tsgscraft.advancedclothing.REFERENCE;
-import de.tsgscraft.advancedclothing.attachments.ClothingAttachments;
 import de.tsgscraft.advancedclothing.client.ClothingCommand;
-import de.tsgscraft.advancedclothing.client.ClothingElement;
-import de.tsgscraft.advancedclothing.client.ClothingRegistry;
 import de.tsgscraft.advancedclothing.client.modifiers.ClothingModifiers;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -19,16 +15,10 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
-
-import java.util.List;
-import java.util.Map;
 
 @SuppressWarnings("removal")
 @EventBusSubscriber(modid = REFERENCE.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class NeoForgeEvents {
-
-
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onRenderPlayer(RenderPlayerEvent.Pre event) {
@@ -61,12 +51,5 @@ public class NeoForgeEvents {
     @SubscribeEvent
     public static void registerCommands(RegisterClientCommandsEvent event) {
         event.getDispatcher().register(ClothingCommand.Command);
-    }
-
-    @SubscribeEvent
-    public static void serverTick(ServerTickEvent.Pre event) {
-        if (event.getServer().getTickCount() % 2 == 0) {
-            REFERENCE.updateRagdollPlayers(event.getServer());
-        }
     }
 }

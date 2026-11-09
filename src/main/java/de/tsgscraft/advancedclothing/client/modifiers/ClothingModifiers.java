@@ -1,9 +1,8 @@
 package de.tsgscraft.advancedclothing.client.modifiers;
 
 import com.google.gson.JsonObject;
-import de.tsgscraft.advancedclothing.attachments.ClothingAttachments;
 import de.tsgscraft.advancedclothing.client.ClothingElement;
-import de.tsgscraft.advancedclothing.client.ClothingRegistry;
+import de.tsgscraft.advancedclothing.ClothingRegistry;
 import dev.leo.sableplayerragdoll.block.entity.RagdollPartBlockEntity;
 import dev.leo.sableplayerragdoll.entity.RagdollDollEntity;
 import net.minecraft.client.model.PlayerModel;
@@ -44,12 +43,11 @@ public class ClothingModifiers {
     }
 
     public static void applyModifiersToPlayer(Player player) {
-        Map<String, String> clothingData = player.getData(ClothingAttachments.CLOTHING_DATA);
-
-        List<ClothingElement> clothingElements = ClothingRegistry.getInstance().getClothingElements().stream()
-                .filter(clothingElement -> clothingData.containsValue(clothingElement.id().toString()))
+        Map<String, String> elements = ClothingRegistry.getInstance().getActiveClothingElements(player.getUUID());
+        List<ClothingElement> clothingElements = elements.values().stream()
+                .map(s -> ClothingRegistry.getInstance().getClothingElements().get(s))
+                .filter(clothingElement -> clothingElement != null && clothingElement.modifiers() != null)
                 .toList();
-
         applyModifiersToPlayer(player, clothingElements);
     }
 

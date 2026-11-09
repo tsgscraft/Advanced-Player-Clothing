@@ -76,4 +76,15 @@ public class AnchorLayer extends PlayerModel<AbstractClientPlayer> {
 
         return LayerDefinition.create(mesh, 64, 64);
     }
+
+    public void copyPlayerProperties(PlayerModel<?> source) {
+        // PlayerModel-specific parts
+        this.leftSleeve.copyFrom(source.leftSleeve);
+        this.rightSleeve.copyFrom(source.rightSleeve);
+
+        this.leftPants.copyFrom(source.leftPants);
+        this.rightPants.copyFrom(source.rightPants);
+
+        this.jacket.copyFrom(source.jacket);
+    }
 }

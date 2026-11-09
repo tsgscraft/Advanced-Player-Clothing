@@ -1,4 +1,4 @@
-package de.tsgscraft.advancedclothing.mixin;
+package de.tsgscraft.advancedclothing.client.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import de.tsgscraft.advancedclothing.Config;
